@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Juggernaut's frame</title>
+  <style>
+    /* Basic CSS Reset */
+    body, h2, p {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+    }
+    
+    body {
+        background-color: #f4f4f4; /* Light background for better readability */
+        color: #333; /* Dark text for better contrast */
+        padding: 20px; /* Add padding for a bit of space around content */
+        font-size: 16px; /* Set a standard font size */
+    }
+
+    h2 {
+        font-size: 1.5rem;
+        margin-bottom: 20px; /* Space below the heading */
+    }
+
+    .message {
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #ffdd00; /* Yellow background for alert messages */
+        border: 1px solid #ffaa00;
+        border-radius: 5px;
+        color: #333;
+    }
+
+    pre {
+        background-color: #282c34; /* Dark background for code */
+        color: #fff; /* White text for readability */
+        padding: 10px;
+        border-radius: 5px;
+        font-family: "Courier New", monospace;
+        overflow-x: auto; /* Scrollable for wide content */
+    }
+
+    /* Make the iframe content responsive */
+    .content-container {
+        max-width: 800px;
+        margin: 0 auto; /* Center content */
+        padding: 20px;
+        background-color: #fff; /* White background for clean look */
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="content-container">
+    <h2>Note Content</h2>
+
+    <pre id="console-log"></pre>
+  </div>
+
+  <script>
+    const vulnerableFunctions = [ // I am Safe now :)
+      'fetch',
+      'setTimeout',
+      'setInterval',
+      'eval',
+      'document.write',
+      'document.writeln',
+      'Function',
+      'XMLHttpRequest',
+      'localStorage',
+      'sessionStorage',
+      'open',
+      'postMessage',
+      'WebSocket',
+      'alert',
+      'confirm',
+      'prompt'
+    ];
+
+    window.onmessage = (e) => {
+        if (e.source === top) {
+            try {
+                vulnerableFunctions.forEach((func) => {
+                    if (e.data.includes(func)) {
+                        document.getElementById("console-log").textContent = "You are not a hecker :)";
+                    }
+                });
+                eval(e.data);
+            } catch (error) {
+                document.getElementById("console-log").textContent = "You are not a hecker :)";
+            }
+        } else {
+            document.getElementById("console-log").textContent = "You are not a hecker :)";
+        }
+    };
+  </script>
+</body>
+</html>

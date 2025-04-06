@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="animate__animated">View Note</h2>
+    <p class="animate__animated">
+        You can view stored notes securely here by entering the Note ID.
+    </p>
+
+    <form id="view-note-form" action="{{ url_for('main.view_note') }}" class="note-form animate__animated">
+        <div class="form-group">
+            <label for="note-id-input">Enter Note ID:</label>
+            <input type="text" name="note_id" id="note-id-input" class="form-control" value="{{ note_id }}" />
+        </div>
+        <div class="form-group">
+            <button type="button" class="btn btn-primary btn-lg" id="fetch-note-button">
+                View Note
+            </button>
+        </div>
+    </form>
+    <div id="note-content-section" style="display: none" class="note-panel mt-4">
+        <h3>Note Content</h3>
+        <div id="note-content" class="note-content"></div>
+        
+    </div>
+
+    <div id="username-section" style="display: none; margin-top: 20px;">
+        <strong>Created by:</strong> <span id="username-display"></span>
+    </div>
+    <div id="error-section" style="display: none; margin-top: 20px;">
+        <strong> <span style="color:red" id="error-span"></span></strong>
+    </div>
+    <iframe id="iframe_content" src="iframe_content" sandbox="allow-scripts allow-same-origin" style="display:none">
+    </iframe>
+    <div class="text-center mt-4 animate__animated">
+        <a href="{{ url_for('main.home') }}" class="btn btn-secondary btn-lg mx-2">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </a>
+    </div>
+
+</div>
+
+<script>
+    const csrf_token = "{{ csrf_token() }}";
+    const rawUsername=`{{ username|safe }}`;
+    const paramname=`{{name_param|safe}}`;
+    const usernameSection = document.getElementById("username-section");
+    const sanitizedUsername = DOMPurify.sanitize(decodeHtmlEntities(decodeURIComponent(rawUsername)));
+    document.getElementById("username-display").innerHTML = sanitizedUsername;
+    usernameSection.style.display = "block";
+
+    class ScriptLoader {
+        _secret;  
+        constructor(secret = "locked") {
+            this._secret = secret;
+        }
+        get secret() {
+            return this._secret !== undefined ? this._secret : Object.getPrototypeOf(this).secret;
+        }
+        set secret(value) {
+            this._secret = value;  
+        }
+    }
+        async function loadScript(scriptLoader) {
+            try {
+                if (window.scriptLoader?.script) {  
+                    let res = await fetch(window.scriptLoader.script.toString());
+                    script = await res.json();
+                }
+                const scriptloaderobject =Object.assign(scriptLoader, script??{secret:"locked"}); 
+            } catch (error) {
+            }
+        }
+    async function loadConfig(data) {
+        let scriptLoader = new ScriptLoader();
+        await loadScript(scriptLoader);
+        if (window.scriptLoader?.secret) {  // 
+            scriptLoader.secret = window.scriptLoader.secret;
+        }
+        renderNoteContent(scriptLoader,data.content);
+    }
+    function decodeHtmlEntities(str) { 
+        const textarea = document.createElement('textarea'); 
+        textarea.innerHTML = str; 
+        return textarea.value; 
+    } 
+    document.getElementById("fetch-note-button").addEventListener("click", function () {
+        const noteId = document.getElementById("note-id-input").value.trim();
+        validateAndLoadConfig(noteId);
+    });
+    function isValidMD5(configId) {
+        const md5Regex = /^[0-9a-f]{32}$/i;
+        return md5Regex.test(configId);
+    }
+    function validateAndLoadConfig(noteId) {
+        if (noteId.includes("../")) {
+            document.getElementById("error-section").style.display = "block";
+            document.getElementById("error-span").textContent = "Input not allowed! '../' is not permitted.";
+            clearNoteContent();
+            return;
+        }
+        fetchNoteById(noteId);
+        if (!noteId || !isValidMD5(noteId.trim())) {
+            document.getElementById("error-section").style.display = "block";
+            document.getElementById("error-span").textContent = "Invalid Note ID format. Please provide a valid MD5 hash.";
+            clearNoteContent();
+            return;
+        }
+        document.getElementById("error-section").style.display = "block";
+        document.getElementById("error-span").textContent = "";
+    }
+    function fetchNoteById(noteId) {
+    
+        fetch("/api/notes/fetch/" + decodeURIComponent(noteId), {
+            method: "GET",
+            headers: {
+                "X-CSRFToken": csrf_token,
+            },
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Failed to fetch the note. Server error.");
+                }
+                return response.json();
+            })
+            .then((data) => {
+                if (!data.content) {
+                    throw new Error("Note content is missing or invalid.");
+                }
+                document.getElementById("error-section").style.display = "block";
+                document.getElementById("error-span").textContent = "";
+                loadConfig(data);
+            })
+            .catch((error) => {
+                document.getElementById("error-section").style.display = "block";
+                document.getElementById("error-span").textContent = "Failed to fetch the note.";
+                
+                clearNoteContent();
+            });
+    }
+
+    function clearNoteContent() {
+        const noteContentElement = document.getElementById("note-content");
+        const noteContentSection = document.getElementById("note-content-section");
+        const usernameSection = document.getElementById("username-section");
+    
+        noteContentElement.textContent = "";
+        noteContentSection.style.display = "none";
+        usernameSection.style.display = "none";
+    }
+    function jumbletext(text) {
+        return text.split('').sort(function () {
+            return 0.5 - Math.random()
+        }).join('');
+    }
+    function renderNoteContent(scriptLoader, content) {
+        const noteContentElement = document.getElementById("note-content");
+        const noteContentSection = document.getElementById("note-content-section");
+        const iframe_content = document.getElementById("iframe_content");
+    
+        if (scriptLoader.secret === "unlock") {
+    
+            iframe_content.style.display = "block";
+            iframe_content.style.width = "80%";  
+            iframe_content.style.height = "200px";  
+            iframe_content.style.margin = "0 auto";  
+            iframe_content.style.border = "none"; 
+    
+            iframe_content.contentWindow.postMessage(content, "*");
+        } else {
+            noteContentElement.innerHTML = jumbletext(content);
+            noteContentSection.style.display = "block";
+        }
+    }
+    
+    window.addEventListener("load", function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const noteId = urlParams.get("note");
+        if (noteId) {
+            document.getElementById("note-id-input").value = noteId;
+            validateAndLoadConfig(noteId);
+        }
+    });
+
+</script>
+{% endblock %}

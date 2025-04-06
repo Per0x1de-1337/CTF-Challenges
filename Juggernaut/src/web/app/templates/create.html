@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="create-container">
+    <h1 style="color:blue">Create Note</h1>
+    <p >Create and share the notes</p>
+    <form id="note-form">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            {{ form.content.label }}
+            {{ form.content(class="form-control non-resizable", rows=10, cols=50, id="note-content") }}
+        </div>
+        <div class="form-group">
+            <button type="button" class="btn btn-primary" id="submit-button">Create Note</button>
+        </div>
+    </form>
+    <div id="note-id-section" class="note-id-section" style="display: none;">
+        <h3>Your Note ID</h3>
+        <h3 id="note-id">Your Note ID</h3>
+        <p>Your note has been successfully saved</p>
+        <div class="note-link">
+            <a href="" id="view-note-link" class="btn btn-view-note" target="_blank">View Note</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    const csrf_token = "{{ csrf_token() }}";
+
+    document.getElementById("submit-button").addEventListener("click", function () {
+        const rawContent = document.getElementById("note-content").value;
+
+        if (!rawContent) {
+            alert("Note content cannot be empty!");
+            return;
+        }
+
+        const sanitizedContent = DOMPurify.sanitize(rawContent);
+
+        fetch("/api/notes/store", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrf_token,
+            },
+            body: JSON.stringify({
+                content: sanitizedContent,
+            }),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success) {
+                    const noteId = data.note_id;
+                    document.getElementById("note-id").innerHTML = noteId;
+                    document.getElementById("note-id-section").style.display = "block";
+                    document.getElementById("view-note-link").href = "/view?note=" + noteId;
+                } else {
+                    alert("Error: " + data.error);
+                }
+            });
+    });
+</script>
+{% endblock %}

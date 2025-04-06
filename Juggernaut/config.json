@@ -1,0 +1,9 @@
+{
+    "author": "per0xyd3",
+    "challengeName": "Juggernaut",
+    "challengeDescription": "The notes are shuffled and in chaos—rearrange them to find the hidden flag. Can you juggle the pieces and restore order?",
+    "minPoints": 100,
+    "maxPoints": 500,
+    "category": "Web",
+    "flag": "flag{jug6l1n6_1s_4m4z1n6_4nd_1_l0v3_1t}"
+}

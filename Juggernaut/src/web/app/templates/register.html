@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="animate__animated" style="color: #12343b;">Register</h2>
+<form method="POST" class="animate__animated note-form">
+    {{ form.hidden_tag() }}
+    
+    <div class="form-group">
+        {{ form.username.label(style="color: #2d545e;") }} 
+        {{ form.username(class="form-control", style="border: 1px solid #c89666; border-radius: 8px;") }}
+    </div>
+    
+    <div class="form-group">
+        {{ form.password.label(style="color: #2d545e;") }} 
+        {{ form.password(class="form-control", style="border: 1px solid #c89666; border-radius: 8px;") }}
+    </div>
+    
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary" style="background-color: #2d545e; border: none;">Register</button>
+    </div>
+    
+    {% if error_register %}
+    <div class="form-group">
+        <h3 style="color: red;">{{ error_register }}</h3>
+    </div>
+    {% endif %}
+</form>
+
+<p style="color: #c89666;">
+    Already have an account? <a href="{{ url_for('main.login') }}" style="color: #12343b;">Login here</a>
+</p>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="bay-container">
+    <h2>Spin to Get a Random Username!</h2>
+    <form method="POST" action="{{ url_for('main.bay', return=request.args.get('return', url_for('main.home'))) }}">
+
+    {% if username %}
+        <div class="username">
+            <p>Your random username is: <strong>{{ username }}</strong></p>
+        </div>
+
+        <a href="{{ return_url }}" class="btn btn-primary">Go Back Home</a>
+    {% else %}
+        <button id="spinButton" class="btn btn-primary" onclick="generateUsername()">Spin!</button>
+    {% endif %}
+    </form>
+</div>
+
+<script>
+function generateUsername() {
+    const usernames = [
+    "Blaze",
+    "Venom",
+    "Phoenix",
+    "Fury",
+    "Shadow",
+    "Storm",
+    "Ace",
+    "Nova",
+    "Rogue",
+    "Fissure",
+    "Perseus",
+    "Ratchet",
+    "Cobra",
+    "Reaper",
+    "Colt",
+    "Rigs",
+    "Crank",
+    "Pwner",
+    "Creep",
+    "Roadkill",
+    "Daemon",
+    "Hijacker",
+    "Locker",
+    "Manifesto",
+    "Thunder",
+    "JUGGLERY",
+    "Repulsor",
+    "Revenger",
+    "DrDisconnect",
+    "Stabber",
+    "Asaurus Rex",
+    "Uber Fast"
+];
+    const randomUsername = usernames[Math.floor(Math.random() * usernames.length)];
+
+    const container = document.querySelector('.bay-container');
+    container.innerHTML = `
+        <h2>Spin to Get a Random Username!</h2>
+        <div class="username">
+            <p>Your random username is: <strong>${randomUsername}</strong></p>
+        </div>
+        <a href="{{ return_url }}" class="btn btn-primary">Go Back Home</a>
+    `;
+}
+</script>
+
+<style>
+    .bay-container {
+        text-align: center;
+        padding: 20px;
+        border: 2px solid #ccc;
+        border-radius: 10px;
+        background-color: #f9f9f9;
+        max-width: 500px;
+        margin: auto;
+    }
+    .username {
+        margin-top: 20px;
+        font-size: 18px;
+    }
+    .btn {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 20px;
+    }
+    .btn:hover {
+        background-color: #0056b3;
+    }
+</style>
+
+{% endblock %}

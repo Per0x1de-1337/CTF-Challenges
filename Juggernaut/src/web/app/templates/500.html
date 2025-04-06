@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="error-message animate__animated animate__fadeIn">
+        <h1>500 - Internal Server Error</h1>
+        <p>Something went wrong on our end. Please try again later or contact support if the issue persists.</p>
+        <a href="{{ url_for('main.home') }}" class="btn">Go Back to Home</a>
+    </div>
+{% endblock %}
